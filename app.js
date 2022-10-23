@@ -11,6 +11,8 @@ const session = require("express-session");
 
 const app = express();
 
+require('dotenv').config()
+
 // middlewares
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
@@ -19,7 +21,7 @@ app.use(
   session({
     resave: false, // don't save session if unmodified
     saveUninitialized: false, // don't create session until something stored
-    secret: "SECRET_KEY",
+    secret: process.env.SECRET_KEY,
   })
 );
 
