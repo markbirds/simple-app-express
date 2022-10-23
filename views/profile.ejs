@@ -19,11 +19,11 @@
               class="d-flex align-items-center justify-content-between my-3 mb-4"
             >
               <div>Profile</div>
-              {% if editable %}
+              <% if(editable){ %>
               <a href="/auth/logout" class="btn btn-sm btn-danger">Logout</a>
-              {% else %}
+              <% } else{ %>
               <a href="/users" class="btn btn-sm btn-danger">Back</a>
-              {% endif %}
+              <% } %>
             </div>
             <form>
               <div class="mb-3 mt-3">
@@ -33,7 +33,7 @@
                   class="form-control"
                   id="firstname"
                   placeholder="Enter your first name"
-                  value="{{ user.firstname }}"
+                  value="<%= user.firstname %>"
                   name="firstname"
                   required
                 />
@@ -45,7 +45,7 @@
                   class="form-control"
                   id="lastname"
                   placeholder="Enter your last name"
-                  value="{{ user.lastname }}"
+                  value="<%= user.lastname %>"
                   name="lastname"
                   required
                 />
@@ -57,7 +57,7 @@
                   class="form-control"
                   id="age"
                   placeholder="Enter age"
-                  value="{{ user.age }}"
+                  value="<%= user.age %>"
                   name="age"
                   required
                 />
@@ -70,7 +70,7 @@
                   id="email"
                   placeholder="Enter email"
                   name="email"
-                  value="{{ user.email }}"
+                  value="<%= user.email %>"
                   required
                 />
               </div>
@@ -80,11 +80,11 @@
                   type="text"
                   class="form-control"
                   id="date"
-                  value="{{ user.date_created }}"
+                  value="<%= user.createdAt %>"
                   readonly
                 />
               </div>
-              {% if editable %}
+              <% if(editable){ %>
               <div class="d-flex justify-content-between">
                 <button id="delete" class="btn btn-sm btn-danger">
                   Delete
@@ -93,12 +93,58 @@
                   Save
                 </button>
               </div>
-              {% endif %}
+              <% } %>
             </form>
           </section>
         </div>
       </div>
     </section>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+      // prettier-ignore
+      let user = JSON.parse('<%- JSON.stringify(user) %>');
+      let editable = "<%- editable %>";
+
+      if (editable === "false") {
+        $("input").attr("disabled", "disabled");
+      }
+
+      $(document).ready(function () {
+        $("form").submit(function (e) {
+          e.preventDefault();
+          const formValues = $(this).serializeArray();
+          const data = {};
+
+          for (const x of formValues) {
+            if (x.value != user[x.name]) {
+              data[x.name] = x.value;
+            }
+          }
+
+          if (Object.keys(data).length) {
+            $.ajax({
+              url: "/update",
+              method: "PATCH",
+              data,
+            })
+              .done(function (data) {
+                user = data.data;
+                alert(data.message);
+              })
+              .fail(function (response) {
+                alert("Request failed: " + response.statusText);
+              });
+          }
+        });
+
+        $("#delete").click(async function () {
+          await $.ajax({
+            url: `/users/${user.id}`,
+            method: "DELETE",
+          });
+          window.location.href = "/auth/login";
+        });
+      });
+    </script>
   </body>
 </html>

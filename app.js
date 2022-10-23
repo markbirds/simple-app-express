@@ -7,12 +7,21 @@ const registerRouter = require("./routes/register");
 const sequelize = require("./db/connect");
 const User = require("./models/user");
 
+const session = require("express-session");
+
 const app = express();
 
 // middlewares
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(
+  session({
+    resave: false, // don't save session if unmodified
+    saveUninitialized: false, // don't create session until something stored
+    secret: "SECRET_KEY",
+  })
+);
 
 // template engine
 app.set("view engine", "ejs");
@@ -29,6 +38,7 @@ app.use(function (req, res) {
 
 const run = async () => {
   try {
+    // model synsynchronization (creates database if does not exist)
     await sequelize.sync({ alter: true });
     app.listen(5000);
   } catch (error) {
