@@ -29,11 +29,13 @@ router
       },
     });
 
-    // if email and password are correct, redirect to user page
-    const validPassword = await bcrypt.compare(password, user.password);
-    if (user && validPassword) {
-      req.session.userId = user.id;
-      return res.redirect("/");
+    if (user) {
+      // if email and password are correct, redirect to user page
+      const validPassword = await bcrypt.compare(password, user.password);
+      if (validPassword) {
+        req.session.userId = user.id;
+        return res.redirect("/");
+      }
     }
 
     res.render("login", { error: "User not found" });
